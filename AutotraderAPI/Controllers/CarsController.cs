@@ -1,4 +1,5 @@
-﻿using AutotraderAPI.Models.DTOs;
+﻿using AutotraderAPI.Models;
+using AutotraderAPI.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,25 @@ namespace AutotraderAPI.Controllers
     public class CarsController : ControllerBase
     {
         [HttpPost]
-        public ActionResult AddNewCar(CreateCarDto createcardto)
+        public ActionResult AddNewCar(CreateCarDto createCarDto)
         {
-            return Ok();
+            var car = new Car 
+            { 
+                Id=Guid.NewGuid(),
+                Brand = createCarDto.Brand,
+                Type = createCarDto.Type,
+                Color = createCarDto.Color,
+                Myear = createCarDto.Myear,
+            };
+
+            using (var context=new AutotraderContext())
+            {
+                context.Cars.Add(car);
+                context.SaveChanges();
+
+                return StatusCode(201, new {result=car, message="Sikeres felvétel."});
+            }
+                
         }
     }
 }
