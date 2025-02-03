@@ -50,7 +50,7 @@ namespace AutotraderAPI.Controllers
         }
 
         [HttpPut]
-        public ActionResult PutCarById(Guid id, string brand, string type, string color, DateTime myear)
+        public ActionResult PutCar(Guid id, string brand, string type, string color, DateTime myear)
         {
             using (var context = new AutotraderContext())
             {
