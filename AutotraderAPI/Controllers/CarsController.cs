@@ -66,26 +66,29 @@ namespace AutotraderAPI.Controllers
 
 
         [HttpPut]
-        public ActionResult PutCar(Guid id, string brand, string type, string color, DateTime myear)
+        public ActionResult UpdateCar(Guid id, UpdateCarDto updateCarDto)
         {
-            using (var context = new AutotraderContext())
+            using (var context=new AutotraderContext())
             {
-                try
+                var existingCar=context.Cars.FirstOrDefault(c=>c.Id==id);
+
+                if(existingCar!=null)
                 {
-                    Car car = new Car { };
-                    car.Id = id;
-                    car.Brand = brand;
-                    car.Type = type;
-                    car.Color = color;
-                    car.Myear = myear;
-                    context.Cars.Update(car);
+                    existingCar.Brand= updateCarDto.Brand;
+                    existingCar.Type= updateCarDto.Type;
+                    existingCar.Color= updateCarDto.Color;
+                    existingCar.Myear= updateCarDto.Myear;
+                    existingCar.UpdatedTime = DateTime.Now;
+
+                    context.Cars.Update(existingCar);
                     context.SaveChanges();
-                    return StatusCode(200, new { result = car, message = "Sikeres módosítás." });
+
+                    if (existingCar != null)
+                    {
+                        return Ok(new { result = existingCar, message = "Sikeres módosítás." });
+                    }
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                return NotFound();
             }
         }
 
@@ -94,17 +97,17 @@ namespace AutotraderAPI.Controllers
         {
             using (var context = new AutotraderContext())
             {
-                try
+                var car = context.Cars.FirstOrDefault(x => x.Id==id);
+
+                if(car!=null)
                 {
-                    Car car = new Car { Id = id };
                     context.Cars.Remove(car);
                     context.SaveChanges();
-                    return StatusCode(200, new { result = car, message = "Sikeres törlés." });
+                    return Ok(new { result = car, message = "Sikeres törlés." });
+
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                return NotFound();
+
             }
         }
     }
