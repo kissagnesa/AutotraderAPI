@@ -32,22 +32,38 @@ namespace AutotraderAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetCars()
+        public ActionResult GetAllCar()
         {
-            List<Car> response = new List<Car>();
-            using (var context = new AutotraderContext())
+            using (var context=new AutotraderContext())
             {
-                try
+                var cars = context.Cars.ToList();
+
+               if(cars!=null)
                 {
-                    response = context.Cars.ToList();
-                    return StatusCode(200, new { result = response, message = "Sikeres lekérdezés." });
+                    return Ok(new { result = cars, message = "Sikeres lekérés." });
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                Exception e = new();
+                return BadRequest(new {result="", message=e.Message});
             }
         }
+
+        [HttpGet]
+
+        public ActionResult GetCarById(Guid id)
+        {
+            using (var context=new AutotraderContext())
+            {
+                var car = context.Cars.FirstOrDefault(x=>x.Id==id);
+
+                if(car!=null)
+                {
+                    return Ok(new { result = car, message = "Sikeres találat." });
+                }
+                return NotFound();
+            }
+            
+        }
+
 
         [HttpPut]
         public ActionResult PutCar(Guid id, string brand, string type, string color, DateTime myear)
