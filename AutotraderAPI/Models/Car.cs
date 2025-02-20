@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AutotraderAPI.Models;
+namespace AutotraderApi.Models;
 
 public partial class Car
 {
