@@ -1,4 +1,7 @@
 
+using AutotraderApi.Models;
+using Microsoft.EntityFrameworkCore;
+
 namespace AutotraderAPI
 {
     public class Program
@@ -6,6 +9,12 @@ namespace AutotraderAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddDbContext<AutotraderContext>(options =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("MySql");
+                options.UseMySQL(connectionString);
+            });
 
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 

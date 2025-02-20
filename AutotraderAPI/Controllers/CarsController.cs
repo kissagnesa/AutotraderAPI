@@ -1,4 +1,5 @@
-﻿using AutotraderAPI.Models;
+﻿using AutotraderApi.Models;
+using AutotraderAPI.Models;
 using AutotraderAPI.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
