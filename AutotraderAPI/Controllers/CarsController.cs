@@ -1,115 +1,132 @@
-﻿using AutotraderApi.Models;
-using AutotraderAPI.Models;
-using AutotraderAPI.Models.DTOs;
+﻿using AutotraderAPI.Models.DTOs;
+using AutotraderApi.Models;
+using AutotraderBackend.Models;
+using AutotraderBackend.Models.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace AutotraderAPI.Controllers
+namespace AutotraderBackend.Controllers
 {
     [Route("cars")]
     [ApiController]
     public class CarsController : ControllerBase
     {
-        [HttpPost]
-        public ActionResult AddNewCar(CreateCarDto createCarDto)
+
+        private readonly AutotraderContext _context;
+
+        public CarsController(AutotraderContext context)
         {
+            _context = context;
+        }
+
+        [HttpDelete("carbyid")]
+        public async Task<ActionResult> DeleteCar(Guid id)
+        {
+            // using (var context = new AutotraderContext())
+            // {
+            try
+            {
+                Car car = new Car { Id = id };
+                _context.Cars.Remove(car);
+                await _context.SaveChangesAsync();
+                return StatusCode(200, new { result = car, message = "Sikeres törlés" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            //}
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> AddNewCar(CreateCarDto createCarDto)
+        {
+
             var car = new Car
             {
                 Id = Guid.NewGuid(),
                 Brand = createCarDto.Brand,
                 Type = createCarDto.Type,
                 Color = createCarDto.Color,
-                Myear = createCarDto.Myear,
+                Myear = createCarDto.Myear
             };
 
-            using (var context = new AutotraderContext())
+            //using (var context = new AutotraderContext())
+            //{
+            try
             {
-                context.Cars.Add(car);
-                context.SaveChanges();
-
-                return StatusCode(201, new { result = car, message = "Sikeres felvétel." });
+                await _context.Cars.AddAsync(car);
+                await _context.SaveChangesAsync();
+                return StatusCode(201, new { result = car, message = "Sikeres felvétel" });
             }
-
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            //}
         }
 
-        [HttpGet]
-        public ActionResult GetAllCar()
+        [HttpPut("carbyid")]
+        public async Task<ActionResult> UpdateCarById(Guid id, UpdateCarDto updateCarDto)
         {
-            using (var context=new AutotraderContext())
+            //using (var context = new AutotraderContext())
+            //{
+            try
             {
-                var cars = context.Cars.ToList();
-
-               if(cars!=null)
-                {
-                    return Ok(new { result = cars, message = "Sikeres lekérés." });
-                }
-                Exception e = new();
-                return BadRequest(new {result="", message=e.Message});
+                Car car = new Car { Id = id };
+                car = _context.Cars.FirstOrDefault(x => x.Id == id);
+                car.Brand = updateCarDto.Brand;
+                car.Type = updateCarDto.Type;
+                car.Color = updateCarDto.Color;
+                car.Myear = updateCarDto.Myear;
+                car.UpdatedTime = DateTime.Now;
+                _context.Cars.Update(car);
+                await _context.SaveChangesAsync();
+                return StatusCode(200, new { result = car, message = "Sikeres módosítás" });
             }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            //}
         }
 
         [HttpGet]
+        public ActionResult GetCars()
+        {
+            List<Car> response = new List<Car>();
+            //using (var context = new AutotraderContext())
+            //{
+            try
+            {
+                response = _context.Cars.ToList();
+                return StatusCode(200, new { result = response, message = "Sikeres lekérdezés" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            //}
+        }
 
+        [HttpGet("carbyid")]
         public ActionResult GetCarById(Guid id)
         {
-            using (var context=new AutotraderContext())
+            //using (var context = new AutotraderContext())
+            //{
+            try
             {
-                var car = context.Cars.FirstOrDefault(x=>x.Id==id);
-
-                if(car!=null)
-                {
-                    return Ok(new { result = car, message = "Sikeres találat." });
-                }
-                return NotFound();
+                Car car = new Car { Id = id };
+                car = _context.Cars.FirstOrDefault(x => x.Id == id);
+                return StatusCode(200, new { result = car, message = "Sikeres lekérdezés" });
             }
-            
-        }
-
-
-        [HttpPut]
-        public ActionResult UpdateCar(Guid id, UpdateCarDto updateCarDto)
-        {
-            using (var context=new AutotraderContext())
+            catch (Exception ex)
             {
-                var existingCar=context.Cars.FirstOrDefault(c=>c.Id==id);
-
-                if(existingCar!=null)
-                {
-                    existingCar.Brand= updateCarDto.Brand;
-                    existingCar.Type= updateCarDto.Type;
-                    existingCar.Color= updateCarDto.Color;
-                    existingCar.Myear= updateCarDto.Myear;
-                    existingCar.UpdatedTime = DateTime.Now;
-
-                    context.Cars.Update(existingCar);
-                    context.SaveChanges();
-
-                    if (existingCar != null)
-                    {
-                        return Ok(new { result = existingCar, message = "Sikeres módosítás." });
-                    }
-                }
-                return NotFound();
+                return BadRequest(ex.Message);
             }
-        }
-
-        [HttpDelete]
-        public ActionResult DeleteCar(Guid id)
-        {
-            using (var context = new AutotraderContext())
-            {
-                var car = context.Cars.FirstOrDefault(x => x.Id==id);
-
-                if(car!=null)
-                {
-                    context.Cars.Remove(car);
-                    context.SaveChanges();
-                    return Ok(new { result = car, message = "Sikeres törlés." });
-
-                }
-                return NotFound();
-
-            }
+            //}
         }
     }
 }

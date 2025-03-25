@@ -1,20 +1,19 @@
-
-using AutotraderApi.Models;
+using AutotraderBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AutotraderAPI
+namespace AutotraderBackend
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             builder.Services.AddDbContext<AutotraderContext>(options =>
             {
-                var connectionString = builder.Configuration.GetConnectionString("MySql");
+                var connectionString = builder.Configuration.GetConnectionString("MySQL");
                 options.UseMySQL(connectionString);
-            });
+            }
+            );//regisztrálom auz osztálytaminek a példányosítása a builder feladata
 
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -30,11 +29,6 @@ namespace AutotraderAPI
                                                                 .AllowAnyMethod();
                                       });
             });
-
-            // A végére mehet ez
-
-
-
 
             // Add services to the container.
 
@@ -56,12 +50,11 @@ namespace AutotraderAPI
 
             app.UseAuthorization();
 
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.MapControllers();
 
             app.Run();
-
-            app.UseCors(MyAllowSpecificOrigins);
         }
     }
 }
